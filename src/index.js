@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 2929;
 const DEFAULT_LOCAL_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:5173",
+  "https://ruphingassi.me/",
+  "https://intellice-ruphin-delta.vercel.app/"
 ];
 
 const getAllowedOrigins = () => {
