@@ -8,10 +8,46 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 2929;
+const DEFAULT_LOCAL_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+];
+
+const getAllowedOrigins = () => {
+  const configuredOrigins = (process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  return configuredOrigins.length > 0
+    ? configuredOrigins
+    : DEFAULT_LOCAL_ORIGINS;
+};
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Allow requests without Origin, such as health checks and curl.
+    if (!origin || getAllowedOrigins().includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origin not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+};
 
 // Middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+
+app.use((error, req, res, next) => {
+  if (error.message === "Origin not allowed by CORS") {
+    return res.status(403).json({ error: "Origin not allowed by CORS" });
+  }
+
+  return next(error);
+});
 
 // Déclaration de la route du CV
 app.use("/api/chat-cv", cvChatRouter);
@@ -25,3 +61,5 @@ app.get("/health", (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });
+
+export default app;
