@@ -42,21 +42,16 @@ const corsOptions = {
   credentials: true
 };
 
-// Ce middleware unique gère automatiquement GET, POST et les preflights OPTIONS
 app.use(cors(corsOptions));
-
 app.use(express.json());
 
-// Middleware de gestion d'erreur CORS
 app.use((error, req, res, next) => {
   if (error.message === "Origin not allowed by CORS") {
     return res.status(403).json({ error: "Origin not allowed by CORS" });
   }
-
   return next(error);
 });
 
-// Routes
 app.use("/api/chat-cv", cvChatRouter);
 
 app.get("/health", (req, res) => {
